@@ -23,7 +23,7 @@ class sqHelp:
             self.tables_dict = tables_dict
 
             for key in tables_dict:
-                self.tables_lista.append(key)
+                self.tables_list.append(key)
 
             if build:
                 self.create_table()
