@@ -1,92 +1,90 @@
 import sqlite3
 
 
-class SqHelp:
+class sqHelp:
     path = ""
-    table_current = ""
+    current_table = ""
     tables_list = []
-    columns_dict = {}
+    tables_dict = {}
+
+    # not finished, need execptions
+    def __init__(self, path: str, created: bool = False, tables_dict: dict = {}, build: bool = False):
+        self.path = path
+
+        # fill
+        if created:
+            
+            return
+
+        if len(tables_dict) == 0:
+            return False
+        
+        else:
+            self.tables_dict = tables_dict
+
+            for key in tables_dict:
+                self.tables_lista.append(key)
+
+            if build:
+                self.create_table()
+
+            return True
+            
+    
 
     #   Table methods
     #       Set
 
-    def table_add(self, name: str):
-        self.table_current = name
+    def add_table(self, name: str):
+        self.current_table = name
         self.tables_list.append(name)
-        self.columns_dict[name] = {}
+        self.tables_dict[name] = {}
 
         return True
 
-    def table_current_set(self, name: str):
+    # need execptions
+    def set_current_table(self, name: str):
         for def_name in self.tables_list:
             if name == def_name:
-                self.table_current = name
+                self.current_table = name
 
                 return True
 
         return False
 
-    #       Get
-
-    def table_get(self):
-        return self.tables_list
-
-    def table_current_get(self):
-        return self.table_current
-
     #   Columns methods
     #       Set
 
-    def column_add(self, name: str, type: str):
-        if self.table_current == "":
+    # need execptions
+    def add_column(self, name: str, type: str):
+        if self.current_table == "":
             return False
 
-        self.columns_dict[self.table_current][name] = type
+        if type.lower() == "int" or type.lower() == "integer":
+            self.tables_dict[self.current_table][name] = "INTEGER"
 
-        return True
+        elif type.lower() == "str" or type.lower() == "string" or type.lower() == "text":
+            self.tables_dict[self.current_table][name] = "TEXT"
 
-    def column_add_int(self, name: str):
-        if self.table_current == "":
-            return False
+        elif type.lower() == "float" or type.lower() == "double" or type.lower() == "real":
+            self.tables_dict[self.current_table][name] = "REAL"
 
-        self.columns_dict[self.table_current][name] = "INTEGER"
-
-        return True
-
-    def column_add_str(self, name: str):
-        if self.table_current == "":
-            return False
-
-        self.columns_dict[self.table_current][name] = "TEXT"
-
-        return True
-
-    def column_add_double(self, name: str):
-        if self.table_current == "":
-            return False
-
-        self.columns_dict[self.table_current][name] = "REAL"
-
-        return True
-
-    def column_add_binary(self, name: str):
-        if self.table_current == "":
-            return False
-
-        self.columns_dict[self.table_current][name] = "BLOB"
+        elif type.lower() == "bin" or type.lower() == "bit" or type.lower() == "blob":
+            self.tables_dict[self.current_table][name] = "BLOB"
 
         return True
 
     #   Class methods
 
+    # not finished, need execptions
     def create_table(self):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
 
-        req = f"CREATE TABLE {self.table_current}("
+        req = f"CREATE TABLE {self.current_table}("
 
-        for key in self.columns_dict[self.table_current]:
-            req += f"{key} {self.columns_dict[self.table_current][key]},"
+        for key in self.tables_dict[self.current_table]:
+            req += f"{key} {self.tables_dict[self.current_table][key]},"
 
         req = req[0: len(req) - 1]
         req += ");"
