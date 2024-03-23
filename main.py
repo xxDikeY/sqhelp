@@ -14,10 +14,12 @@ class sqHelp:
         # fill
         if created:
             
-            return
+            #return
+            pass
 
         if len(tables_dict) == 0:
-            return False
+            #return False
+            pass
         
         else:
             self.tables_dict = tables_dict
@@ -28,7 +30,7 @@ class sqHelp:
             if build:
                 self.create_table()
 
-            return True
+            #return True
             
     
 
@@ -74,12 +76,20 @@ class sqHelp:
 
         return True
 
-    #   Class methods
+    #   Class methodsa
 
     # not finished, need execptions
     def create_table(self):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS sqhelp(id INTEGER PRIMARY KEY AUTOINCREMENT, table_name TEXT, column_name TEXT, column_type TEXT)""")
+
+        # problem here
+        for table_name in self.tables_dict:
+            for column_name in table_name:
+                cur.execute(f"INSERT INTO sqhelp (table_name, column_name) VALUES ('{table_name}', '{column_name}', '{table_name[column_name]}')")
+                con.commit()
 
         req = f"CREATE TABLE {self.current_table}("
 
@@ -90,7 +100,20 @@ class sqHelp:
         req += ");"
 
         cur.execute(req)
-        con.commit()
 
         return True
 
+# tables_dict={
+
+#     "People" : 
+#     {
+#         "id" : "int",
+#         "name" : "str"
+#     },
+
+#     "Jobs" :
+#     {
+#         "id" : "int",
+#         "people" : "text"
+#     }
+# }
