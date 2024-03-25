@@ -21,16 +21,46 @@ class sqHelp:
             #return False
             pass
         
+        # done
         else:
             self.tables_dict = tables_dict
+            
 
             for key in tables_dict:
                 self.tables_list.append(key)
 
-            if build:
-                self.create_table()
+            self.current_table = self.tables_list[0]
 
-            #return True
+            
+            if build:
+                con = sqlite3.connect(self.path)
+                cur = con.cursor()
+
+                cur.execute("DROP TABLE IF EXISTS sqhelp")
+                cur.execute("CREATE TABLE sqhelp(id INTEGER PRIMARY KEY AUTOINCREMENT, table_name TEXT, column_name TEXT, column_type TEXT)")
+
+                for table_name in self.tables_dict:
+                    req = f"CREATE TABLE {table_name}("
+
+                    for column_name in self.tables_dict[table_name]:
+                        cur.execute(f"INSERT INTO sqhelp (table_name, column_name, column_type) VALUES ('{table_name}', '{column_name}', '{self.tables_dict[table_name][column_name]}')")
+                        con.commit()
+
+                        req += f"{column_name} {self.format_types(self.tables_dict[table_name][column_name])},"
+
+                    req = req[0: len(req) - 1]
+                    req += ");"
+                    
+                    cur.execute(req)
+
+
+                   
+                    
+
+
+
+
+                
             
     
 
@@ -54,7 +84,7 @@ class sqHelp:
 
         return False
 
-    #   Columns methods
+    #   Columns method
     #       Set
 
     # need execptions
@@ -62,16 +92,16 @@ class sqHelp:
         if self.current_table == "":
             return False
 
-        if type.lower() == "int" or type.lower() == "integer":
+        if type.lower() in ["int", "integer"]:
             self.tables_dict[self.current_table][name] = "INTEGER"
 
-        elif type.lower() == "str" or type.lower() == "string" or type.lower() == "text":
+        elif type.lower() in ["str", "string", "text"]:
             self.tables_dict[self.current_table][name] = "TEXT"
 
-        elif type.lower() == "float" or type.lower() == "double" or type.lower() == "real":
+        elif type.lower() in ["float", "double", "real"]:
             self.tables_dict[self.current_table][name] = "REAL"
 
-        elif type.lower() == "bin" or type.lower() == "bit" or type.lower() == "blob":
+        elif type.lower() in ["bin", "bit", "blob"]:
             self.tables_dict[self.current_table][name] = "BLOB"
 
         return True
@@ -82,14 +112,6 @@ class sqHelp:
     def create_table(self):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
-
-        cur.execute("""CREATE TABLE IF NOT EXISTS sqhelp(id INTEGER PRIMARY KEY AUTOINCREMENT, table_name TEXT, column_name TEXT, column_type TEXT)""")
-
-        # problem here
-        for table_name in self.tables_dict:
-            for column_name in table_name:
-                cur.execute(f"INSERT INTO sqhelp (table_name, column_name) VALUES ('{table_name}', '{column_name}', '{table_name[column_name]}')")
-                con.commit()
 
         req = f"CREATE TABLE {self.current_table}("
 
@@ -102,18 +124,20 @@ class sqHelp:
         cur.execute(req)
 
         return True
+    
+    #   Static methods
+    #       Other
 
-# tables_dict={
+    def format_types(self, types : str):
+        
+        if types.lower() in ["int", "integer"]:
+            return "INTEGER"
+        
+        elif types.lower() in ["str", "string", "text"]:
+            return "TEXT"
 
-#     "People" : 
-#     {
-#         "id" : "int",
-#         "name" : "str"
-#     },
+        elif types.lower() in ["float", "double", "real"]:
+            return "REAL"
 
-#     "Jobs" :
-#     {
-#         "id" : "int",
-#         "people" : "text"
-#     }
-# }
+        elif types.lower() in ["bin", "bit", "blob"]:
+            return "BLOB"
