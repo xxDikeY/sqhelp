@@ -1,13 +1,13 @@
 from main import *
 import sqlite3
 
-database = SqHelp()
-database.path = "test.db"
+# database = sqHelp("test.db", tables_dict={"People" : {"id" : "int", "name" : "str"}}, build=True)
 
-database.table_add("People")
-database.column_add_int("id")
-database.column_add_str("name")
+# print("done")
 
-database.create_table()
 
-print("done")
+tables_dict={"People" : {    "id" : "int",    "name" : "str"},"Jobs" :{"id" : "int","people" : "text"}}
+
+#sq = sqHelp("tst.db", tables_dict=tables_dict, build=True)
+sq = sqHelp("tst.db", created=True)
+

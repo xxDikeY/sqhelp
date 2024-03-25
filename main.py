@@ -11,14 +11,22 @@ class sqHelp:
     def __init__(self, path: str, created: bool = False, tables_dict: dict = {}, build: bool = False):
         self.path = path
 
-        # fill
         if created:
-            
-            #return
-            pass
+            con = sqlite3.connect(self.path)
+            cur = con.cursor()
+
+            req = cur.execute("SELECT * FROM sqhelp")
+
+            for line in req.fetchall():
+                if not line[1] in self.tables_dict:
+                    self.tables_list.append(line[1])
+                self.tables_dict[line[1]] = {line[2] : line[3]}
+
+            self.current_table = self.tables_list[0]
+
 
         if len(tables_dict) == 0:
-            #return False
+            # exeption
             pass
         
         # done
@@ -46,7 +54,7 @@ class sqHelp:
                         cur.execute(f"INSERT INTO sqhelp (table_name, column_name, column_type) VALUES ('{table_name}', '{column_name}', '{self.tables_dict[table_name][column_name]}')")
                         con.commit()
 
-                        req += f"{column_name} {self.format_types(self.tables_dict[table_name][column_name])},"
+                        req += f"{column_name} {self.format_types(self.tables_dict[table_name][column_name])}, "
 
                     req = req[0: len(req) - 1]
                     req += ");"
@@ -55,15 +63,6 @@ class sqHelp:
 
 
                    
-                    
-
-
-
-
-                
-            
-    
-
     #   Table methods
     #       Set
 
