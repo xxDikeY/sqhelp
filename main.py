@@ -1,98 +1,143 @@
 import sqlite3
 
 
-class SqHelp:
+class sqHelp:
     path = ""
-    table_current = ""
+    current_table = ""
     tables_list = []
-    columns_dict = {}
+    tables_dict = {}
+
+    # not finished, need execptions
+    def __init__(self, path: str, created: bool = False, tables_dict: dict = {}, build: bool = False):
+        self.path = path
+
+        # fill
+        if created:
+            
+            #return
+            pass
+
+        if len(tables_dict) == 0:
+            #return False
+            pass
+        
+        # done
+        else:
+            self.tables_dict = tables_dict
+            
+
+            for key in tables_dict:
+                self.tables_list.append(key)
+
+            self.current_table = self.tables_list[0]
+
+            
+            if build:
+                con = sqlite3.connect(self.path)
+                cur = con.cursor()
+
+                cur.execute("DROP TABLE IF EXISTS sqhelp")
+                cur.execute("CREATE TABLE sqhelp(id INTEGER PRIMARY KEY AUTOINCREMENT, table_name TEXT, column_name TEXT, column_type TEXT)")
+
+                for table_name in self.tables_dict:
+                    req = f"CREATE TABLE {table_name}("
+
+                    for column_name in self.tables_dict[table_name]:
+                        cur.execute(f"INSERT INTO sqhelp (table_name, column_name, column_type) VALUES ('{table_name}', '{column_name}', '{self.tables_dict[table_name][column_name]}')")
+                        con.commit()
+
+                        req += f"{column_name} {self.format_types(self.tables_dict[table_name][column_name])},"
+
+                    req = req[0: len(req) - 1]
+                    req += ");"
+                    
+                    cur.execute(req)
+
+
+                   
+                    
+
+
+
+
+                
+            
+    
 
     #   Table methods
     #       Set
 
-    def table_add(self, name: str):
-        self.table_current = name
+    def add_table(self, name: str):
+        self.current_table = name
         self.tables_list.append(name)
-        self.columns_dict[name] = {}
+        self.tables_dict[name] = {}
 
         return True
 
-    def table_current_set(self, name: str):
+    # need execptions
+    def set_current_table(self, name: str):
         for def_name in self.tables_list:
             if name == def_name:
-                self.table_current = name
+                self.current_table = name
 
                 return True
 
         return False
 
-    #       Get
-
-    def table_get(self):
-        return self.tables_list
-
-    def table_current_get(self):
-        return self.table_current
-
-    #   Columns methods
+    #   Columns method
     #       Set
 
-    def column_add(self, name: str, type: str):
-        if self.table_current == "":
+    # need execptions
+    def add_column(self, name: str, type: str):
+        if self.current_table == "":
             return False
 
-        self.columns_dict[self.table_current][name] = type
+        if type.lower() in ["int", "integer"]:
+            self.tables_dict[self.current_table][name] = "INTEGER"
+
+        elif type.lower() in ["str", "string", "text"]:
+            self.tables_dict[self.current_table][name] = "TEXT"
+
+        elif type.lower() in ["float", "double", "real"]:
+            self.tables_dict[self.current_table][name] = "REAL"
+
+        elif type.lower() in ["bin", "bit", "blob"]:
+            self.tables_dict[self.current_table][name] = "BLOB"
 
         return True
 
-    def column_add_int(self, name: str):
-        if self.table_current == "":
-            return False
+    #   Class methodsa
 
-        self.columns_dict[self.table_current][name] = "INTEGER"
-
-        return True
-
-    def column_add_str(self, name: str):
-        if self.table_current == "":
-            return False
-
-        self.columns_dict[self.table_current][name] = "TEXT"
-
-        return True
-
-    def column_add_double(self, name: str):
-        if self.table_current == "":
-            return False
-
-        self.columns_dict[self.table_current][name] = "REAL"
-
-        return True
-
-    def column_add_binary(self, name: str):
-        if self.table_current == "":
-            return False
-
-        self.columns_dict[self.table_current][name] = "BLOB"
-
-        return True
-
-    #   Class methods
-
+    # not finished, need execptions
     def create_table(self):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
 
-        req = f"CREATE TABLE {self.table_current}("
+        req = f"CREATE TABLE {self.current_table}("
 
-        for key in self.columns_dict[self.table_current]:
-            req += f"{key} {self.columns_dict[self.table_current][key]},"
+        for key in self.tables_dict[self.current_table]:
+            req += f"{key} {self.tables_dict[self.current_table][key]},"
 
         req = req[0: len(req) - 1]
         req += ");"
 
         cur.execute(req)
-        con.commit()
 
         return True
+    
+    #   Static methods
+    #       Other
 
+    def format_types(self, types : str):
+        
+        if types.lower() in ["int", "integer"]:
+            return "INTEGER"
+        
+        elif types.lower() in ["str", "string", "text"]:
+            return "TEXT"
+
+        elif types.lower() in ["float", "double", "real"]:
+            return "REAL"
+
+        elif types.lower() in ["bin", "bit", "blob"]:
+            return "BLOB"
