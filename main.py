@@ -1,4 +1,5 @@
 import sqlite3
+import exepctions
 
 
 class sqHelp:
@@ -7,7 +8,7 @@ class sqHelp:
     tables_list = []
     tables_dict = {}
 
-    # not finished, need execptions
+    # need debug
     def __init__(self, path: str, created: bool = False, tables_dict: dict = {}, build: bool = False):
         self.path = path
 
@@ -15,9 +16,13 @@ class sqHelp:
             con = sqlite3.connect(self.path)
             cur = con.cursor()
 
-            req = cur.execute("SELECT * FROM sqhelp")
+            try:
+                list = cur.execute("SELECT * FROM sqhelp").fetchall()
+            except sqlite3.OperationalError:
+                raise exepctions.TableNotFound("The sqhelp table was not found. Please create and fill in this table yourself.")
 
-            for line in req.fetchall():
+
+            for line in list:
                 if not line[1] in self.tables_dict:
                     self.tables_list.append(line[1])
                 self.tables_dict[line[1]] = {line[2] : line[3]}
@@ -26,8 +31,7 @@ class sqHelp:
 
 
         if len(tables_dict) == 0:
-            # exeption
-            pass
+            raise ValueError("The 'tables_dict' dictionary is empty.")
         
         # done
         else:
@@ -71,25 +75,23 @@ class sqHelp:
         self.tables_list.append(name)
         self.tables_dict[name] = {}
 
-        return True
+        return None
 
-    # need execptions
     def set_current_table(self, name: str):
         for def_name in self.tables_list:
             if name == def_name:
                 self.current_table = name
 
-                return True
+                return None
 
-        return False
+        raise exepctions.TableNotFound(f"The '{name}' tabel was not found in the list of tables")
 
     #   Columns method
     #       Set
 
-    # need execptions
     def add_column(self, name: str, type: str):
         if self.current_table == "":
-            return False
+            raise ValueError("The 'current_table' field is empty.")
 
         if type.lower() in ["int", "integer"]:
             self.tables_dict[self.current_table][name] = "INTEGER"
@@ -103,11 +105,11 @@ class sqHelp:
         elif type.lower() in ["bin", "bit", "blob"]:
             self.tables_dict[self.current_table][name] = "BLOB"
 
-        return True
+        return None
 
-    #   Class methodsa
+    #   Class methods
 
-    # not finished, need execptions
+    # not finished, need execptions (need debug)
     def create_table(self):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
